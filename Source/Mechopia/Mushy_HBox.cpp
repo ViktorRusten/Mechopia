@@ -17,6 +17,7 @@ void AMushy_HBox::BeginPlay()
 {
 	Super::BeginPlay();
 
+	//Only being used when Mr. mushy is attacking
 	GetWorldTimerManager().SetTimer(HBoxTimerHandle, this, &AMushy_HBox::SelfDestruct, 0.5, true);
 
 
