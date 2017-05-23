@@ -31,6 +31,7 @@ void ADoor::Tick( float DeltaTime )
 	SetActorLocation(NewLocation);
 }
 
+//Checks if the amount of switches needing to be pressed have been pressed and then moves throught the floor
 void ADoor::Move()
 {
 	SwitchAmount -= 1;

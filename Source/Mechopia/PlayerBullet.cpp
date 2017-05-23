@@ -20,6 +20,7 @@ APlayerBullet::APlayerBullet()
 	// Set the root component to be the collision component.
 	RootComponent = MeshComponent;
 
+	//genererer overlapp
 	Cast<UShapeComponent>(RootComponent)->bGenerateOverlapEvents = true;
 	Cast<UShapeComponent>(RootComponent)->OnComponentBeginOverlap.AddDynamic(this,
 		&APlayerBullet::OnOverlap);          //Her er ABullet navnet på klassen vi er inne i.
@@ -33,12 +34,12 @@ void APlayerBullet::BeginPlay()
 	Super::BeginPlay();
 	Forward = GetActorForwardVector();
 
-	UE_LOG(LogTemp, Warning, TEXT("Bullet was spawned"));
+	//UE_LOG(LogTemp, Warning, TEXT("Bullet was spawned"));
 
 	Timer = 5;
 }
 
-// Called every frame
+// Called every frame and moves the bullet forward
 void APlayerBullet::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -50,42 +51,43 @@ void APlayerBullet::Tick(float DeltaTime)
 	Timer -= (1 * DeltaTime);
 
 	if (Timer < 0) {
-		UE_LOG(LogTemp, Warning, TEXT("Bullet was destroyed"));
+		//UE_LOG(LogTemp, Warning, TEXT("Bullet was destroyed"));
 		Destroy();
 	}
 }
 
+//Overlapping events dependent on what gets overlapped
 void APlayerBullet::OnOverlap(UPrimitiveComponent* OverlappedComponent, AActor *OtherActor,
 	UPrimitiveComponent *OtherComponent, int32 OtherBodyIndex,
 	bool bFromSweep, const FHitResult &SweepResult)
 {
-	UE_LOG(LogTemp, Warning, TEXT("Bullet has hit"));
+	//UE_LOG(LogTemp, Warning, TEXT("Bullet has hit"));
 
 	if (OtherActor->IsA(AMr_Mushy::StaticClass())) {
-		UE_LOG(LogTemp, Warning, TEXT("Bullet hit mr mushy"));
-		UE_LOG(LogTemp, Warning, TEXT("Bullet was destroyed"));
+		//UE_LOG(LogTemp, Warning, TEXT("Bullet hit mr mushy"));
+		//UE_LOG(LogTemp, Warning, TEXT("Bullet was destroyed"));
 		AMr_Mushy* Enemy = Cast<AMr_Mushy>(OtherActor);
 		Enemy->OnHit();
 		Destroy();			//Slett kule
 	}
 
 	else if (OtherActor->IsA(AChickenLegs::StaticClass())) {
-		UE_LOG(LogTemp, Warning, TEXT("Bullet hit mr mushy"));
-		UE_LOG(LogTemp, Warning, TEXT("Bullet was destroyed"));
+		//UE_LOG(LogTemp, Warning, TEXT("Bullet hit mr mushy"));
+		//UE_LOG(LogTemp, Warning, TEXT("Bullet was destroyed"));
 		AChickenLegs* Enemy = Cast<AChickenLegs>(OtherActor);
 		Enemy->OnHit();
 		Destroy();			//Slett kule
 	}
 
 	else if (OtherActor->IsA(ASwitch::StaticClass())) {
-		UE_LOG(LogTemp, Warning, TEXT("Bullet hit the switch"));
+		//UE_LOG(LogTemp, Warning, TEXT("Bullet hit the switch"));
 		ASwitch* Switch = Cast<ASwitch>(OtherActor);
 		Switch->OnHit();
 		Destroy();
 	}
 
 	else if (OtherActor->IsA(ADoor::StaticClass())){
-	UE_LOG(LogTemp, Warning, TEXT("Bullet hit the door"));
+	//UE_LOG(LogTemp, Warning, TEXT("Bullet hit the door"));
 	Destroy();
 	}
 

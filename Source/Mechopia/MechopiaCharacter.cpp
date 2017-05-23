@@ -13,6 +13,8 @@
 
 AMechopiaCharacter::AMechopiaCharacter()
 {
+
+	//Initial start value for the variables
 	Dead = false;
 
 	DeathTimer = 1.4;
@@ -37,10 +39,6 @@ AMechopiaCharacter::AMechopiaCharacter()
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
 
 	AutoPossessPlayer = EAutoReceiveInput::Player0;
-
-	// set our turn rates for input
-	BaseTurnRate = 45.f;
-	BaseLookUpRate = 45.f;
 
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
@@ -80,24 +78,16 @@ void AMechopiaCharacter::SetupPlayerInputComponent(class UInputComponent* Player
 	// Set up gameplay key bindings
 	check(PlayerInputComponent);
 
+	//binds the players input
 	PlayerInputComponent->BindAxis("MoveForward", this, &AMechopiaCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AMechopiaCharacter::MoveRight);
-
-
-	// We have 2 versions of the rotation bindings to handle different kinds of devices differently
-	// "turn" handles devices that provide an absolute delta, such as a mouse.
-	// "turnrate" is for devices that we choose to treat as a rate of change, such as an analog joystick
-	//PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
-	//PlayerInputComponent->BindAxis("TurnRate", this, &AMechopiaCharacter::TurnAtRate);
-	//PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
-	//PlayerInputComponent->BindAxis("LookUpRate", this, &AMechopiaCharacter::LookUpAtRate);
-
 	InputComponent->BindAction("Fire", IE_Pressed, this, &AMechopiaCharacter::Fire);
 	InputComponent->BindAction("Punch", IE_Pressed, this, &AMechopiaCharacter::Punch);
 }
 
 void AMechopiaCharacter::Tick(float DeltaTime)
 {
+	//A timer to alow the death animation to play before restarting the level
 	if (Dead == true) {
 		DeathTimer -= DeltaTime;
 		if (DeathTimer < 0) {
@@ -105,11 +95,13 @@ void AMechopiaCharacter::Tick(float DeltaTime)
 		}
 	}
 	else {
+
+		//invincebility timer
 		if (DamageTimer > 0) {
 			DamageTimer -= DeltaTime;
 		}
 
-
+		//Walk animation variable changer
 		if (MovingVector.IsZero())
 		{
 			Moving = false;
@@ -120,6 +112,7 @@ void AMechopiaCharacter::Tick(float DeltaTime)
 			MovingVector.Y = 0;
 		}
 
+		//calling rotate with mouse
 		RotateWithMouse();
 	}
 }
@@ -138,21 +131,10 @@ void AMechopiaCharacter::RotateWithMouse()
 
 		FRotator currentCharacterRotation = GetActorRotation();
 
+		//sets rotation towards the mouse raytrace position
 		FRotator newRotation = FRotator(currentCharacterRotation.Pitch, targetVector.Rotation().Yaw, currentCharacterRotation.Roll);
 		SetActorRotation(newRotation);
 	}
-}
-
-void AMechopiaCharacter::TurnAtRate(float Rate)
-{
-	// calculate delta for this frame from the rate information
-	AddControllerYawInput(Rate * BaseTurnRate * GetWorld()->GetDeltaSeconds());
-}
-
-void AMechopiaCharacter::LookUpAtRate(float Rate)
-{
-	// calculate delta for this frame from the rate information
-	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
 }
 
 void AMechopiaCharacter::MoveForward(float Value)
@@ -166,7 +148,8 @@ void AMechopiaCharacter::MoveForward(float Value)
 		// get forward vector
 		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
 		AddMovementInput(Direction, Value);
-
+		
+		//animation varible
 		MovingVector.Y = Value;
 	}
 }
@@ -184,16 +167,20 @@ void AMechopiaCharacter::MoveRight(float Value)
 		// add movement in that direction
 		AddMovementInput(Direction, Value);
 
+		//animation variable
 		MovingVector.X = Value;
 	}
 }
 
+//setts up the player to shoot a bullet
 void AMechopiaCharacter::Fire()
 {
+	//only activates if the player isnt shooting or punching already
 	if (Punching == false && Shooting == false) {
 
-		UE_LOG(LogTemp, Warning, TEXT("Trying to fire"));
+		//UE_LOG(LogTemp, Warning, TEXT("Trying to fire"));
 
+		//set timers for spawning and animation
 		GetWorldTimerManager().SetTimer(ShootTimerHandle, this, &AMechopiaCharacter::Shoot, 0.2f, true);
 		GoingToShoot = true;
 		Shooting = true;
@@ -201,16 +188,22 @@ void AMechopiaCharacter::Fire()
 	}
 }
 
+//Called when the player takes damage
 int AMechopiaCharacter::TakingDamage(int Damage) {
 
+	//Makes the player take no damage during invincibility frames
 	if (DamageTimer < 1 && !Punching) {
-		UE_LOG(LogTemp, Warning, TEXT("Taking damage"));
+		//UE_LOG(LogTemp, Warning, TEXT("Taking damage"));
 		if (Damage) {
-
+			//deal the damage and start the invinibility timer
 			CurrentHealth -= Damage;
 			DamageTimer = InvincibleTimer;
+
+			//Updates the HUD variable
 			PlayerHealthHUD = (CurrentHealth / PlayerHealth);
 		}
+
+		//if health = 0 start death animation
 		if (CurrentHealth < 1) {
 			Dead = true;
 		}
@@ -220,25 +213,36 @@ int AMechopiaCharacter::TakingDamage(int Damage) {
 	return 0;
 }
 
-
+//Punching move
 void AMechopiaCharacter::Punch()
 {
+	//only acivates if the player isnt shooting or punching
 	if (Shooting == false && Punching == false) {
 
-		UE_LOG(LogTemp, Warning, TEXT("Starting punch"));
+		//UE_LOG(LogTemp, Warning, TEXT("Starting punch"));
+
+		//Starts timer and changes check variable
 		Punching = true;
 		GetWorldTimerManager().SetTimer(PunchTimerHandle, this, &AMechopiaCharacter::StopPunch, 0.6f, true);
 	}
 }
 
+//Plays when coming in contact with a health pickup
 void AMechopiaCharacter::GainHealth() {
+
+	//activates if the players health is lower than the max health
 	if (CurrentHealth < PlayerHealth) {
 		CurrentHealth += 1;
+
+		//Update HUD variable
 		PlayerHealthHUD = (CurrentHealth / PlayerHealth);
 	}
 }
 
+//Deals damage when punch is active
 int AMechopiaCharacter::MeleeDamage(AActor* Enemy) {
+
+		//Checks if the object coliding is an enemy
 		if (Enemy->IsA(AMr_Mushy::StaticClass())) {
 			AMr_Mushy* TheEnemy = Cast<AMr_Mushy>(Enemy);
 			TheEnemy->OnHit();
@@ -257,7 +261,7 @@ void AMechopiaCharacter::Shoot()
 	UWorld* World = GetWorld();	//Henter peker til spillverdenen
 	if (World && Fired == false )			//tester at verdenen finnes
 	{
-		UE_LOG(LogTemp, Warning, TEXT("World is present"));
+		//UE_LOG(LogTemp, Warning, TEXT("World is present"));
 
 		FVector Location = GetActorLocation();
 
@@ -265,6 +269,7 @@ void AMechopiaCharacter::Shoot()
 
 		FVector Forward = GetActorForwardVector();
 
+		//spawns bullet on the location compared to the player
 		World->SpawnActor<APlayerBullet>(BulletBlueprint, Location + (Forward * SpawnDistance), Rotation);
 
 		Fired = true;
@@ -288,7 +293,7 @@ void AMechopiaCharacter::StopShoot()
 
 void AMechopiaCharacter::StopPunch()
 {
-	UE_LOG(LogTemp, Warning, TEXT("Stopping punch"));
+	//UE_LOG(LogTemp, Warning, TEXT("Stopping punch"));
 	GetWorldTimerManager().ClearTimer(PunchTimerHandle);
 	Punching = false;
 
