@@ -38,7 +38,7 @@ void AChickenLegs::Tick( float DeltaTime )
 		{
 			Active = true;
 			AChickenLegs::Move();
-			UE_LOG(LogTemp, Log, TEXT("Player Seen"));
+			//UE_LOG(LogTemp, Log, TEXT("Player Seen"));
 		}
 		else if (Active == false)
 		{
@@ -73,7 +73,7 @@ void AChickenLegs::Tick( float DeltaTime )
 				{
 					Attacking = true;
 					GetWorldTimerManager().SetTimer(AttackTimerHandle, this, &AChickenLegs::Attack, 1.0f, true);
-					UE_LOG(LogTemp, Warning, TEXT("Starting attack"));
+					//UE_LOG(LogTemp, Warning, TEXT("Starting attack"));
 
 				}
 	
@@ -116,7 +116,7 @@ int AChickenLegs::DealDamage()
 void AChickenLegs::Attack()
 {
 	Attacking = false;
-	UE_LOG(LogTemp, Warning, TEXT("Attack done"));
+	//UE_LOG(LogTemp, Warning, TEXT("Attack done"));
 
 }
 

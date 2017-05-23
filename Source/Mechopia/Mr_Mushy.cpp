@@ -43,7 +43,7 @@ void AMr_Mushy::Tick(float DeltaTime)
 		{
 			Active = true;
 			AMr_Mushy::Move();
-			UE_LOG(LogTemp, Log, TEXT("Player Seen"));
+			//UE_LOG(LogTemp, Log, TEXT("Player Seen"));
 		}
 		else if (Active == false)
 		{
@@ -78,7 +78,7 @@ void AMr_Mushy::Tick(float DeltaTime)
 				{
 					Attacking = true;
 					GetWorldTimerManager().SetTimer(AttackTimerHandle, this, &AMr_Mushy::Attack, 1.0f, true);
-					UE_LOG(LogTemp, Warning, TEXT("Starting attack"));
+					//UE_LOG(LogTemp, Warning, TEXT("Starting attack"));
 
 				}
 	
@@ -128,7 +128,7 @@ int AMr_Mushy::DealDamage()
 	if (ThePlayerActor) {
 		//Deals damage to player
 		if (ThePlayerActor->IsA(AMechopiaCharacter::StaticClass())) {
-			UE_LOG(LogTemp, Warning, TEXT("Tries to deal damage"));
+			//UE_LOG(LogTemp, Warning, TEXT("Tries to deal damage"));
 			AMechopiaCharacter* Player = Cast<AMechopiaCharacter>(ThePlayerActor);
 			Player->TakingDamage(Damage);
 		}
@@ -142,7 +142,7 @@ void AMr_Mushy::Attack()
 {
 
 	Attacking = false;
-	UE_LOG(LogTemp, Warning, TEXT("Attack done"));
+	//UE_LOG(LogTemp, Warning, TEXT("Attack done"));
 
 }
 
